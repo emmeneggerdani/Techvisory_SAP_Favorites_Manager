@@ -335,13 +335,14 @@
       var f1b=document.createElement('div'); f1b.className='field';
       f1b.innerHTML='<label for="f-tcode">Objektname (TCODE-Feld)</label>';
       tcodeInput=document.createElement('input'); tcodeInput.id='f-tcode'; tcodeInput.maxLength=40; tcodeInput.setAttribute('data-mono','1');
-      tcodeInput.value = editingNode ? (editingNode.tcode||'') : (isFioriInit ? OT_TCODE_DEFAULT_FIORI : OT_TCODE_DEFAULT_URL);
-      tcodeInput.placeholder='z.B. '+OT_TCODE_DEFAULT_URL;
+      tcodeInput.value = isFioriInit ? OT_TCODE_DEFAULT_FIORI : OT_TCODE_DEFAULT_URL;
+      tcodeInput.readOnly = true;
       f1b.appendChild(tcodeInput);
-      var hint0=document.createElement('div'); hint0.className='hint'; hint0.textContent='Technisches Feld der SAP-Favoritendatei – bei freien Web-Adressen üblicherweise "'+OT_TCODE_DEFAULT_URL+'", bei Fiori-Apps "'+OT_TCODE_DEFAULT_FIORI+'".';
+      var hint0=document.createElement('div'); hint0.className='hint'; hint0.textContent='Fest vorgegeben durch die Art des Objekts (siehe unten): "'+OT_TCODE_DEFAULT_URL+'" bei freier URL, "'+OT_TCODE_DEFAULT_FIORI+'" bei Fiori-App.';
       f1b.appendChild(hint0);
       form.appendChild(f1b);
     }
+
 
     var fd=document.createElement('div'); fd.className='field';
     fd.innerHTML='<label for="f-text">'+(kind==='folder'?'Ordnername':'Bezeichnung')+'</label>';
@@ -411,12 +412,7 @@
         var isF = otKindSel.value==='fiori';
         fUrl.style.display = isF ? 'none' : '';
         otFioriWrap.style.display = isF ? '' : 'none';
-        // TCODE-Feld nur automatisch umschalten, solange es noch einem der beiden Defaults entspricht
-        // (also vom Nutzer nicht manuell auf einen eigenen Wert geändert wurde).
-        var known = [OT_TCODE_DEFAULT_URL, OT_TCODE_DEFAULT_FIORI, ''];
-        if(known.indexOf(tcodeInput.value)!==-1){
-          tcodeInput.value = isF ? OT_TCODE_DEFAULT_FIORI : OT_TCODE_DEFAULT_URL;
-        }
+        tcodeInput.value = isF ? OT_TCODE_DEFAULT_FIORI : OT_TCODE_DEFAULT_URL;
         if(isF) updateFioriPreview();
       }
       otKindSel.addEventListener('change', updateOtKindVisibility);
