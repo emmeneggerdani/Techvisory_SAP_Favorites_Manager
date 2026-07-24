@@ -1,0 +1,17 @@
+[
+  { "tcode": "SE11",  "text": "ABAP Dictionary" },
+  { "tcode": "SE16N", "text": "Data Browser" },
+  { "tcode": "SE24",  "text": "Class Builder" },
+  { "tcode": "SE38",  "text": "ABAP Editor" },
+  { "tcode": "SE80",  "text": "Object Navigator" },
+  { "tcode": "SE93",  "text": "Transaktionspflege" },
+  { "tcode": "SM30",  "text": "Tabellenpflege (Generierte Pflegedialoge)" },
+  { "tcode": "SM37",  "text": "Übersicht Hintergrundjobs" },
+  { "tcode": "SM50",  "text": "Übersicht Arbeitsprozesse" },
+  { "tcode": "SM59",  "text": "RFC-Verbindungen pflegen" },
+  { "tcode": "ST22",  "text": "ABAP Runtime Error Analyse" },
+  { "tcode": "SU01",  "text": "Benutzerpflege" },
+  { "tcode": "SU53",  "text": "Auswertung der Berechtigungsprüfung" },
+  { "tcode": "SEGW",  "text": "Gateway Service Builder" },
+  { "tcode": "SOAMANAGER", "text": "SOA Manager" }
+]

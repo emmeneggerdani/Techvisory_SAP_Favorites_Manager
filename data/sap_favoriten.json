@@ -1,0 +1,126 @@
+{
+  "nextId": 14,
+  "nodes": [
+    {
+      "id": 1,
+      "parentId": 0,
+      "kind": "root",
+      "rtype": null,
+      "tcode": "",
+      "text": "Meine Favoriten",
+      "url": ""
+    },
+    {
+      "id": 9,
+      "parentId": 1,
+      "kind": "folder",
+      "rtype": null,
+      "tcode": "",
+      "text": "Testordner für Report / Freitext irgendwas",
+      "url": ""
+    },
+    {
+      "id": 8,
+      "parentId": 1,
+      "kind": "folder",
+      "rtype": null,
+      "tcode": "",
+      "text": "TestOrdner URL",
+      "url": ""
+    },
+    {
+      "id": 4,
+      "parentId": 1,
+      "kind": "folder",
+      "rtype": null,
+      "tcode": "",
+      "text": "Test Ordner Fiori",
+      "url": ""
+    },
+    {
+      "id": 2,
+      "parentId": 1,
+      "kind": "folder",
+      "rtype": null,
+      "tcode": "",
+      "text": "TestOrdner Transaktion",
+      "url": ""
+    },
+    {
+      "id": 3,
+      "parentId": 2,
+      "kind": "entry",
+      "rtype": "TR",
+      "tcode": "SE80",
+      "text": "Object Navigator",
+      "url": ""
+    },
+    {
+      "id": 6,
+      "parentId": 4,
+      "kind": "entry",
+      "rtype": "OT",
+      "tcode": "FLP_APP_PROVIDER",
+      "text": "Startseite Fiori Launchpad",
+      "url": "#"
+    },
+    {
+      "id": 5,
+      "parentId": 4,
+      "kind": "entry",
+      "rtype": "OT",
+      "tcode": "FLP_APP_PROVIDER",
+      "text": "PurchaseOrder Maintain",
+      "url": "#PurchaseOrder-Maintain"
+    },
+    {
+      "id": 7,
+      "parentId": 8,
+      "kind": "entry",
+      "rtype": "OT",
+      "tcode": "URL",
+      "text": "irgendeine Adresse",
+      "url": "www.techvisory.ch"
+    },
+    {
+      "id": 10,
+      "parentId": 9,
+      "kind": "entry",
+      "rtype": "OT",
+      "tcode": "URL",
+      "text": "WEDI - Transaktionsmenu für EDI",
+      "url": "WEDI"
+    },
+    {
+      "id": 11,
+      "parentId": 2,
+      "kind": "folder",
+      "rtype": null,
+      "tcode": "",
+      "text": "Demo Unterordner",
+      "url": ""
+    },
+    {
+      "id": 12,
+      "parentId": 11,
+      "kind": "entry",
+      "rtype": "TR",
+      "tcode": "SE16N",
+      "text": "Allgemeine Tabellenanzeige",
+      "url": "",
+      "fioriSemObj": "",
+      "fioriAction": ""
+    },
+    {
+      "id": 13,
+      "parentId": 4,
+      "kind": "entry",
+      "rtype": "OT",
+      "tcode": "URL",
+      "text": "Kundenaufträge anlegen",
+      "url": "#SalesOrder-create",
+      "fioriSemObj": "SalesOrder",
+      "fioriAction": "create"
+    }
+  ]
+}
