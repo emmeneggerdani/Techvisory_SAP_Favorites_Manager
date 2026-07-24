@@ -97,6 +97,12 @@
     desc.textContent = n.text || (n.kind==='folder' ? '(ohne Namen)' : '');
     row.appendChild(desc);
 
+    if(n.kind==='entry' && n.rtype!=='TR' && n.url){
+      var extra = document.createElement('span'); extra.className='extra';
+      extra.textContent = '('+n.url+')';
+      row.appendChild(extra);
+    }
+
     row.addEventListener('click', function(e){
       e.stopPropagation();
       if(n.kind==='root'){ S.state.selectedIds=new Set([1]); S.state.lastAnchorId=1; renderAll(); return; }

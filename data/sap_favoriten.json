@@ -1,5 +1,5 @@
 {
-  "nextId": 14,
+  "nextId": 16,
   "nodes": [
     {
       "id": 1,
@@ -121,6 +121,28 @@
       "url": "#SalesOrder-create",
       "fioriSemObj": "SalesOrder",
       "fioriAction": "create"
+    },
+    {
+      "id": 14,
+      "parentId": 1,
+      "kind": "entry",
+      "rtype": "TR",
+      "tcode": "SE24",
+      "text": "ABAP Class Builder",
+      "url": "",
+      "fioriSemObj": "",
+      "fioriAction": ""
+    },
+    {
+      "id": 15,
+      "parentId": 1,
+      "kind": "entry",
+      "rtype": "TR",
+      "tcode": "SE80",
+      "text": "Object Navigator",
+      "url": "",
+      "fioriSemObj": "",
+      "fioriAction": ""
     }
   ]
 }

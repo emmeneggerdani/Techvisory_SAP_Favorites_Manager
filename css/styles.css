@@ -49,6 +49,7 @@ main{flex:1;display:flex;overflow:hidden;}
 .node .code{font-family:var(--mono);font-weight:600;color:var(--brand);font-size:12.5px;}
 .node .code.ot{color:var(--brand-accent);}
 .node .desc{color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;}
+.node .extra{color:var(--ink-soft);opacity:.65;font-size:11.5px;font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;}
 .node .badge{font-size:10px;color:#fff;background:var(--ink-soft);border-radius:3px;padding:1px 5px;}
 .children{margin-left:19px;border-left:1px dashed var(--line);padding-left:3px;}
 .empty-hint{color:var(--ink-soft);font-size:13px;padding:20px;text-align:center;}
