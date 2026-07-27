@@ -112,17 +112,6 @@
       "fioriAction": ""
     },
     {
-      "id": 13,
-      "parentId": 4,
-      "kind": "entry",
-      "rtype": "OT",
-      "tcode": "URL",
-      "text": "Kundenaufträge anlegen",
-      "url": "#SalesOrder-create",
-      "fioriSemObj": "SalesOrder",
-      "fioriAction": "create"
-    },
-    {
       "id": 14,
       "parentId": 1,
       "kind": "entry",

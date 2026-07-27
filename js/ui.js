@@ -98,8 +98,19 @@
     row.appendChild(desc);
 
     if(n.kind==='entry' && n.rtype!=='TR' && n.url){
-      var extra = document.createElement('span'); extra.className='extra';
+      var isLink = /^https?:\/\//i.test(n.url);
+      var extra = document.createElement(isLink ? 'a' : 'span');
+      extra.className='extra';
       extra.textContent = '('+n.url+')';
+      if(isLink){
+        extra.href = n.url;
+        extra.target = '_blank';
+        extra.rel = 'noopener noreferrer';
+        extra.title = 'In neuem Tab öffnen: '+n.url;
+        extra.draggable = false;
+        extra.addEventListener('click', function(e){ e.stopPropagation(); });
+        extra.addEventListener('mousedown', function(e){ e.stopPropagation(); });
+      }
       row.appendChild(extra);
     }
 
@@ -121,6 +132,7 @@
     });
 
     row.addEventListener('dragstart', function(e){
+      if(e.target && e.target.tagName==='A'){ e.preventDefault(); return; }
       if(n.kind==='root'){ e.preventDefault(); return; }
       if(!S.state.selectedIds.has(n.id)){ S.state.selectedIds=new Set([n.id]); S.state.lastAnchorId=n.id; renderTree(); }
       draggedIds = new Set(S.state.selectedIds);
@@ -276,26 +288,83 @@
   }
 
   // ==================== Seitenpanel: Info / Auswahl ====================
+  function triggerToolbar(id){ var el=document.getElementById(id); if(el) el.click(); }
+
   function renderInfo(){
     var real = Array.from(S.state.selectedIds).filter(function(id){ return id!==1; });
-    var h=document.createElement('h2'); h.textContent = real.length>1 ? 'Mehrfachauswahl' : 'Auswahl'; sidePanel.appendChild(h);
-    var info=document.createElement('div'); info.className='target-line';
-    if(real.length>1){
-      info.innerHTML = '<b>'+real.length+' Elemente ausgewählt.</b><br>Ziel für „Einfügen“: '+escapeHtml(S.folderPath(S.effectiveTargetFolder()));
-    } else {
-      info.innerHTML = '<b>Ziel für neue Einträge:</b><br>'+escapeHtml(S.folderPath(S.effectiveTargetFolder()));
-    }
-    sidePanel.appendChild(info);
-    var p=document.createElement('div'); p.className='placeholder';
+
     if(real.length===1){
       var n = S.state.nodes.get(real[0]);
-      p.innerHTML = 'Klicke auf <code>✎ Bearbeiten</code> um Namen/Code/Beschreibung zu ändern, <code>⧉ Kopieren</code> zum Duplizieren, oder <code>🗑 Löschen</code> zum Entfernen'+(n && n.kind==='folder' ? ' (inkl. Unterordner)' : '')+'. Elemente lassen sich auch per Drag & Drop in einen anderen Ordner ziehen.';
+      var h=document.createElement('h2'); h.textContent = n.kind==='folder' ? 'Ordner' : (n.rtype==='TR' ? 'Transaktion' : 'OT-Objekt');
+      sidePanel.appendChild(h);
+
+      var card = document.createElement('div'); card.className='detail-card';
+      var title = document.createElement('div'); title.className='detail-title';
+      title.textContent = n.kind==='folder' ? n.text : (n.tcode || '(ohne Code)');
+      card.appendChild(title);
+      if(n.kind==='entry'){
+        var desc = document.createElement('div'); desc.className='detail-desc'; desc.textContent = n.text || '(ohne Bezeichnung)';
+        card.appendChild(desc);
+      }
+      var meta = document.createElement('div'); meta.className='detail-meta';
+      meta.textContent = 'Ordner: '+S.folderPath(n.parentId);
+      card.appendChild(meta);
+      if(n.kind==='entry' && n.rtype!=='TR' && n.url){
+        var urlLine = document.createElement('div'); urlLine.className='detail-meta';
+        var isLink = /^https?:\/\//i.test(n.url);
+        if(isLink){
+          urlLine.appendChild(document.createTextNode('URL: '));
+          var a=document.createElement('a'); a.href=n.url; a.target='_blank'; a.rel='noopener noreferrer';
+          a.textContent=n.url; a.className='detail-link';
+          urlLine.appendChild(a);
+        } else {
+          urlLine.textContent = (n.fioriSemObj ? 'Fiori-Intent: ' : 'Wert: ')+n.url;
+        }
+        card.appendChild(urlLine);
+      }
+      sidePanel.appendChild(card);
+
+      var actions=document.createElement('div'); actions.className='panel-actions';
+      var editBtn=document.createElement('button'); editBtn.className='primary'; editBtn.textContent='✎ Bearbeiten';
+      editBtn.addEventListener('click', function(){ triggerToolbar('btn-edit'); });
+      var copyBtn=document.createElement('button'); copyBtn.textContent='⧉ Kopieren';
+      copyBtn.addEventListener('click', function(){ triggerToolbar('btn-copy'); });
+      var delBtn=document.createElement('button'); delBtn.className='danger'; delBtn.textContent='🗑 Löschen';
+      delBtn.addEventListener('click', function(){ triggerToolbar('btn-delete'); });
+      actions.appendChild(editBtn); actions.appendChild(copyBtn); actions.appendChild(delBtn);
+      sidePanel.appendChild(actions);
+
+      var hint=document.createElement('div'); hint.className='placeholder detail-hint';
+      hint.textContent = 'Lässt sich auch per Drag & Drop in einen anderen Ordner verschieben.';
+      sidePanel.appendChild(hint);
+
     } else if(real.length>1){
-      p.innerHTML = 'Mehrere Elemente ausgewählt (Strg/Cmd+Klick zum Erweitern, Umschalt+Klick für Bereich). Du kannst sie gemeinsam verschieben (Drag & Drop), kopieren oder löschen.';
+      var h2=document.createElement('h2'); h2.textContent='Mehrfachauswahl'; sidePanel.appendChild(h2);
+      var info=document.createElement('div'); info.className='target-line';
+      info.innerHTML = '<b>'+real.length+' Elemente ausgewählt.</b><br>Ziel für „Einfügen“: '+escapeHtml(S.folderPath(S.effectiveTargetFolder()));
+      sidePanel.appendChild(info);
+
+      var actions2=document.createElement('div'); actions2.className='panel-actions';
+      var copyBtn2=document.createElement('button'); copyBtn2.textContent='⧉ Kopieren';
+      copyBtn2.addEventListener('click', function(){ triggerToolbar('btn-copy'); });
+      var delBtn2=document.createElement('button'); delBtn2.className='danger'; delBtn2.textContent='🗑 Löschen';
+      delBtn2.addEventListener('click', function(){ triggerToolbar('btn-delete'); });
+      actions2.appendChild(copyBtn2); actions2.appendChild(delBtn2);
+      sidePanel.appendChild(actions2);
+
+      var p2=document.createElement('div'); p2.className='placeholder';
+      p2.textContent = 'Strg/Cmd+Klick zum Erweitern, Umschalt+Klick für Bereichsauswahl. Gemeinsames Verschieben per Drag & Drop.';
+      sidePanel.appendChild(p2);
+
     } else {
-      p.innerHTML = 'Wähle links einen Ordner oder Eintrag aus. Ohne Auswahl wird auf oberster Ebene angelegt. Strg/Cmd+Klick für Mehrfachauswahl, Umschalt+Klick für Bereichsauswahl.';
+      var h3=document.createElement('h2'); h3.textContent='Auswahl'; sidePanel.appendChild(h3);
+      var info3=document.createElement('div'); info3.className='target-line';
+      info3.innerHTML = '<b>Ziel für neue Einträge:</b><br>'+escapeHtml(S.folderPath(S.effectiveTargetFolder()));
+      sidePanel.appendChild(info3);
+      var p3=document.createElement('div'); p3.className='placeholder';
+      p3.textContent = 'Wähle links einen Ordner oder Eintrag aus, um Details zu sehen und zu bearbeiten. Ohne Auswahl wird auf oberster Ebene angelegt.';
+      sidePanel.appendChild(p3);
     }
-    sidePanel.appendChild(p);
 
     var dbInfo = document.createElement('div');
     dbInfo.className = 'tcode-db-status'+(S.state.tcodeDb.size>0?' loaded':'');

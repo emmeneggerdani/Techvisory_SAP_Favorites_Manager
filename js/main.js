@@ -239,6 +239,7 @@
       S.freshRoot(); S.state.collapsed = new Set(); S.state.clipboard = null;
       UI.renderAll(); Persist.save();
       UI.setFooter('Alle Favoriten wurden gelöscht.');
+      closeSettings();
     });
 
     // ================= SAP-Import/-Export =================
@@ -268,8 +269,9 @@
     document.getElementById('btn-json-save').addEventListener('click', function(){
       var data = JSON.stringify({nextId: S.state.nextId, nodes: Array.from(S.state.nodes.values())}, null, 2);
       downloadBlob(new Blob([data], {type:'application/json'}), 'sap_favoriten_backup_'+stamp()+'.json');
+      closeSettings();
     });
-    document.getElementById('btn-json-load').addEventListener('click', function(){ document.getElementById('file-input-json').click(); });
+    document.getElementById('btn-json-load').addEventListener('click', function(){ closeSettings(); document.getElementById('file-input-json').click(); });
     document.getElementById('file-input-json').addEventListener('change', function(e){
       var file = e.target.files[0]; if(!file) return;
       var reader = new FileReader();
@@ -285,7 +287,7 @@
     });
 
     // ================= TCode-Datenbank: einmaliger Datei-Import ============
-    document.getElementById('btn-tcodedb-load').addEventListener('click', function(){ document.getElementById('file-input-tcodedb').click(); });
+    document.getElementById('btn-tcodedb-load').addEventListener('click', function(){ closeSettings(); document.getElementById('file-input-tcodedb').click(); });
     document.getElementById('file-input-tcodedb').addEventListener('change', function(e){
       var file = e.target.files[0]; if(!file) return;
       var reader = new FileReader();
@@ -306,8 +308,17 @@
     searchInput.addEventListener('input', function(){ S.state.searchQuery = searchInput.value; UI.renderTree(); });
     document.getElementById('btn-search-clear').addEventListener('click', function(){ S.state.searchQuery=''; searchInput.value=''; UI.renderTree(); });
 
+    // ================= Einstellungen (Modal) =================
+    var settingsOverlay = document.getElementById('settings-overlay');
+    function openSettings(){ settingsOverlay.hidden = false; }
+    function closeSettings(){ settingsOverlay.hidden = true; }
+    document.getElementById('btn-settings').addEventListener('click', openSettings);
+    document.getElementById('btn-settings-close').addEventListener('click', closeSettings);
+    settingsOverlay.addEventListener('click', function(e){ if(e.target===settingsOverlay) closeSettings(); });
+
     // ================= Tastenkürzel =================
     document.addEventListener('keydown', function(e){
+      if(e.key==='Escape' && !settingsOverlay.hidden){ closeSettings(); return; }
       var tag = (document.activeElement && document.activeElement.tagName) || '';
       if(tag==='INPUT' || tag==='SELECT') return;
       if(e.key==='Delete'){ document.getElementById('btn-delete').click(); }

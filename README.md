@@ -31,8 +31,12 @@ Abhängigkeiten. `index.html` einfach lokal öffnen.
 - **Duplikate finden** – gruppiert mehrfach vorkommende Transaktionen
   bzw. OT-Objekte (gleicher TCODE bzw. gleiche URL) über alle Ordner
   hinweg.
-- **Lokale Speicherung**: automatisches Sichern im Browser
-  (`localStorage`) sowie manuelles Backup/Restore als JSON-Datei.
+- **Klickbare URLs** – bei OT-Objekten mit einer echten `http(s)`-Adresse
+  lässt sich der Link im Baum direkt anklicken (öffnet in neuem Tab).
+- **Datei-Verknüpfung** als primärer Speicherweg (siehe
+  [Datenhaltung](#datenhaltung)); manuelle JSON-Sicherung und der
+  einmalige TCode-Datenbank-Import liegen bewusst im
+  **⚙ Einstellungen**-Menü, nicht in der Haupt-Symbolleiste.
 
 ## Projektstruktur
 
@@ -47,6 +51,9 @@ sap-favoriten-manager/
 │   ├── filestore.js          Verknüpfung mit echten lokalen Dateien (File System Access API)
 │   ├── ui.js                   Rendering (Baum, Seitenpanel/Formulare)
 │   └── main.js                  Verdrahtung: Toolbar-Events, Datei-Dialoge, Start
+├── assets/
+│   ├── Techvisory_Logo.png  Logo (Header)
+│   └── Techvisory_Kolibri.png  Favicon
 └── data/
     └── tcodes.example.json  Beispiel für eine TCode-Datenbank (siehe unten)
 ```
@@ -60,14 +67,21 @@ Sicherheitsgründen (CORS), klassische Scripts nicht.
 
 1. `index.html` im Browser öffnen (lokal per Doppelklick oder über
    einen beliebigen statischen Webserver).
-2. Bestehende Favoriten über **SAP-Favoriten laden** importieren,
-   oder direkt links im Baum über **+ Ordner / + Transaktion /
+2. Oben in der Verbindungsleiste **🔗 Verbinden** nutzen, um Favoriten
+   und optional die TCode-Datenbank mit einer lokalen Datei zu
+   verknüpfen (siehe [Datenhaltung](#datenhaltung)) – oder direkt ohne
+   Verknüpfung links im Baum über **+ Ordner / + Transaktion /
    + OT-Objekt** neue Einträge anlegen.
-3. Optional eine [TCode-Datenbank](#tcode-datenbank) laden, damit
-   Transaktionscodes beim Anlegen geprüft und automatisch mit dem
-   richtigen Text versehen werden.
+3. Bestehende SAP-Favoriten lassen sich zusätzlich jederzeit über
+   **SAP-Favoriten laden** importieren.
 4. Über **SAP-Favoriten exportieren** eine Datei erzeugen und in SAP
    GUI unter *Favoriten → Favoriten hochladen* wieder einspielen.
+
+Die einmalige JSON-Sicherung/-Wiederherstellung sowie der einmalige
+TCode-Datenbank-Import (ohne dauerhafte Verknüpfung) liegen im
+**⚙ Einstellungen**-Menü oben rechts – gedacht als Fallback für
+Browser ohne Datei-Verknüpfung sowie für gelegentliche manuelle
+Backups.
 
 ## Dateiformat
 
@@ -101,9 +115,11 @@ mitschreiben, geht dieser Teil beim Round-Trip verloren.
 ## TCode-Datenbank
 
 Damit beim Anlegen einer Transaktion Code und Bezeichnung geprüft
-werden können, kann über **TCode-Datenbank laden** eine JSON-Datei
-mit allen bekannten Transaktionen geladen werden. Unterstützt werden
-drei gleichwertige Formate:
+werden können, muss eine JSON-Datei mit allen bekannten Transaktionen
+geladen sein – im Normalfall über **🔗 Verbinden** in der
+Verbindungsleiste (automatisches Nachladen beim Öffnen), alternativ
+einmalig über **⚙ Einstellungen → Einmalig aus Datei laden**.
+Unterstützt werden drei gleichwertige Formate:
 
 ```json
 [
@@ -152,9 +168,11 @@ Favoritendatei geschrieben wird.
 
 ## Datenhaltung
 
-Es gibt drei sich ergänzende Ebenen:
+**Die Datei-Verknüpfung ist der vorgesehene Weg** – alles andere ist
+bewusst ins **⚙ Einstellungen**-Menü verschoben und nur als Fallback
+gedacht.
 
-1. **Datei-Verknüpfung (empfohlen)** – über die Leiste direkt unter
+1. **Datei-Verknüpfung (Standardweg)** – über die Leiste direkt unter
    der Symbolleiste lässt sich sowohl die Favoriten-Datei als auch
    die TCode-Datenbank mit einer echten lokalen Datei verknüpfen
    (🔗 Verbinden). Danach:
@@ -166,12 +184,13 @@ Es gibt drei sich ergänzende Ebenen:
    Technisch basiert das auf der *File System Access API*
    (unterstützt in Chrome, Edge, Opera; **nicht** in Firefox/Safari –
    dort blendet das Tool die Verbindungsleiste automatisch aus und
-   nutzt nur die beiden folgenden Ebenen). Aus Sicherheitsgründen
-   verlangt der Browser nach jedem Neuladen der Seite einmal einen
-   Klick auf „🔓 Zugriff erlauben“, falls die Berechtigung nicht mehr
-   aktiv ist – das ist eine Browser-Vorgabe und keine Einschränkung
-   des Tools. Über „Trennen“ lässt sich die Verknüpfung jederzeit
-   aufheben (die Datei selbst bleibt erhalten).
+   die Funktionen im Einstellungen-Menü sind dann der einzig
+   verfügbare Weg). Aus Sicherheitsgründen verlangt der Browser nach
+   jedem Neuladen der Seite einmal einen Klick auf „🔓 Zugriff
+   erlauben“, falls die Berechtigung nicht mehr aktiv ist – das ist
+   eine Browser-Vorgabe und keine Einschränkung des Tools. Über
+   „Trennen“ lässt sich die Verknüpfung jederzeit aufheben (die Datei
+   selbst bleibt erhalten).
 
 2. **Automatisch im Browser** (`localStorage`) – zusätzlich wird
    jede Änderung im Browser zwischengespeichert, als Fallback für
@@ -181,11 +200,13 @@ Es gibt drei sich ergänzende Ebenen:
    `localStorage` blockiert sein – das Tool erkennt das und weist
    darauf hin.
 
-3. **Manuell** – **JSON speichern/laden** exportiert bzw. importiert
-   den kompletten Baum als einmalige Kopie, unabhängig von Browser
-   und Verknüpfung (z. B. für Backups oder Weitergabe an Kolleg:innen).
-   Ebenso lässt sich die TCode-Datenbank über „TCode-Datenbank laden“
-   einmalig aus einer Datei einlesen, ohne dauerhafte Verknüpfung.
+3. **Manuell, im ⚙ Einstellungen-Menü** – **JSON speichern/laden**
+   exportiert bzw. importiert den kompletten Baum als einmalige
+   Kopie, unabhängig von Browser und Verknüpfung (z. B. für Backups
+   oder Weitergabe an Kolleg:innen). Ebenso lässt sich dort die
+   TCode-Datenbank einmalig aus einer Datei einlesen, ohne dauerhafte
+   Verknüpfung. Dort liegt auch **♻ Alles löschen** zum vollständigen
+   Zurücksetzen.
 
 ## Browser-Kompatibilität
 

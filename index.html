@@ -18,17 +18,10 @@
   <button id="btn-import">📂 SAP-Favoriten laden</button>
   <button id="btn-export" class="primary">⭳ SAP-Favoriten exportieren</button>
   <div class="sep"></div>
-  <button id="btn-json-save">💾 JSON speichern</button>
-  <button id="btn-json-load">📂 JSON laden</button>
-  <div class="sep"></div>
-  <button id="btn-tcodedb-load">🗂 TCode-Datenbank laden</button>
-  <div class="sep"></div>
   <button id="btn-dupes">🧭 Duplikate finden</button>
-  <button id="btn-reset" class="danger">♻ Alles löschen</button>
-  <input type="file" id="file-input-sap" accept=".txt">
-  <input type="file" id="file-input-json" accept=".json">
-  <input type="file" id="file-input-tcodedb" accept=".json">
+  <div class="spacer"></div>
   <span class="count" id="count-badge"></span>
+  <button id="btn-settings" class="icon-btn-round" title="Einstellungen">⚙</button>
 </div>
 
 <div class="toolbar">
@@ -56,6 +49,48 @@
 </main>
 
 <footer id="footer-msg">Noch keine Favoriten geladen — lade eine bestehende Datei oder lege direkt neue Ordner/Einträge an. Änderungen werden automatisch lokal im Browser gespeichert.</footer>
+
+<!-- Einstellungen: Ausnahme-/Fallback-Funktionen, die nicht über die Datei-Verknüpfung laufen -->
+<div id="settings-overlay" class="modal-overlay" hidden>
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>Einstellungen</h2>
+      <button id="btn-settings-close" class="icon-btn">✕</button>
+    </div>
+
+    <div class="modal-section">
+      <h3>Manuelle Sicherung (Kopie)</h3>
+      <p class="modal-hint">Im Normalbetrieb bitte oben <strong>🔗 Verbinden</strong> nutzen – das lädt/speichert
+        automatisch über eine verknüpfte Datei. Die folgenden Funktionen sind nur als einmalige Kopie bzw.
+        als Fallback gedacht (z. B. in Browsern ohne Datei-Verknüpfung wie Firefox/Safari).</p>
+      <div class="modal-actions">
+        <button id="btn-json-save">💾 JSON speichern</button>
+        <button id="btn-json-load">📂 JSON laden</button>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h3>TCode-Datenbank</h3>
+      <p class="modal-hint">Einmaliges Einlesen ohne dauerhafte Verknüpfung – für automatisches Nachladen
+        bei jedem Öffnen stattdessen oben bei „TCode-Datenbank“ verbinden.</p>
+      <div class="modal-actions">
+        <button id="btn-tcodedb-load">📂 Einmalig aus Datei laden</button>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h3>Zurücksetzen</h3>
+      <p class="modal-hint">Löscht alle Favoriten aus diesem Tool unwiderruflich.</p>
+      <div class="modal-actions">
+        <button id="btn-reset" class="danger">♻ Alles löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input-sap" accept=".txt">
+<input type="file" id="file-input-json" accept=".json">
+<input type="file" id="file-input-tcodedb" accept=".json">
 
 <script src="js/format.js"></script>
 <script src="js/store.js"></script>
