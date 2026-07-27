@@ -308,6 +308,18 @@
     searchInput.addEventListener('input', function(){ S.state.searchQuery = searchInput.value; UI.renderTree(); });
     document.getElementById('btn-search-clear').addEventListener('click', function(){ S.state.searchQuery=''; searchInput.value=''; UI.renderTree(); });
 
+    // ================= Alle Ordner auf-/zuklappen =================
+    document.getElementById('btn-expand-all').addEventListener('click', function(){
+      S.state.collapsed = new Set();
+      UI.renderTree();
+    });
+    document.getElementById('btn-collapse-all').addEventListener('click', function(){
+      var all = new Set();
+      S.state.nodes.forEach(function(n){ if(n.kind==='folder') all.add(n.id); });
+      S.state.collapsed = all;
+      UI.renderTree();
+    });
+
     // ================= Einstellungen (Modal) =================
     var settingsOverlay = document.getElementById('settings-overlay');
     function openSettings(){ settingsOverlay.hidden = false; }
