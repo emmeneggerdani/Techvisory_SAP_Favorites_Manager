@@ -1,0 +1,6 @@
+# Persönliche, lokal verknüpfte Favoriten-/TCode-Dateien - nicht im Repo
+data/sap_favoriten_daniel.json
+
+# Betriebssystem-/Editor-Dateien
+.DS_Store
+Thumbs.db
