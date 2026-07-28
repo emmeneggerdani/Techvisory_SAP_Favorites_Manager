@@ -10,9 +10,9 @@ lassen – mit Suche, Drag & Drop, Sortieren, Rückgängig-Funktion und
 mehreren Profilen für unterschiedliche SAP-Systeme.
 
 Es läuft direkt im Browser. Es muss nichts installiert werden, es gibt
-keine Zugriffe auf das Internet (ausser um das Techvisory-Logo
-anzuzeigen) und keinen Server – alle Daten bleiben auf dem eigenen
-Rechner.
+keine Zugriffe auf das Internet und keinen Server – alle Daten
+bleiben auf dem eigenen Rechner (auch Logo und Favicon liegen lokal
+im Ordner `assets/`).
 
 ## Schnellstart
 
