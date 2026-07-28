@@ -33,6 +33,16 @@
   <button id="btn-copy" disabled>⧉ Kopieren</button>
   <button id="btn-paste" disabled>📋 Einfügen</button>
   <button id="btn-delete" class="danger" disabled>🗑 Löschen</button>
+  <div class="sep"></div>
+  <button id="btn-undo" disabled title="Letzte Änderung rückgängig machen (Strg/Cmd+Z)">↶ Rückgängig</button>
+</div>
+
+<div class="toolbar" id="profile-bar">
+  <span class="profile-label">Profil:</span>
+  <select id="profile-select"></select>
+  <button id="btn-profile-new">+ Neu</button>
+  <button id="btn-profile-rename">✎ Umbenennen</button>
+  <button id="btn-profile-delete" class="danger">🗑 Löschen</button>
 </div>
 
 <div class="toolbar" id="connection-bar"></div>
@@ -78,6 +88,15 @@
         bei jedem Öffnen stattdessen oben bei „TCode-Datenbank“ verbinden.</p>
       <div class="modal-actions">
         <button id="btn-tcodedb-load">📂 Einmalig aus Datei laden</button>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h3>Sortieren</h3>
+      <p class="modal-hint">Sortiert alle Ordner alphabetisch (Ordner vor Einträgen), im gesamten Baum.
+        Für einen einzelnen Ordner: Ordner anklicken und im rechten Panel „Sortieren“ nutzen.</p>
+      <div class="modal-actions">
+        <button id="btn-sort-all">🔤 Gesamten Baum sortieren</button>
       </div>
     </div>
 

@@ -18,6 +18,33 @@
     if(global.Persist && typeof global.Persist.save==='function') global.Persist.save();
     else S.saveLocal();
   }
+
+  // Ersetzt ein Text-Element temporär durch ein Eingabefeld (Inline-Edit
+  // per Doppelklick). Enter bestätigt, Escape/Blur-ohne-Änderung bricht ab.
+  function startInlineEdit(el, currentValue, onCommit){
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-edit';
+    input.value = currentValue || '';
+    input.addEventListener('click', function(e){ e.stopPropagation(); });
+    input.addEventListener('mousedown', function(e){ e.stopPropagation(); });
+    var cancelled = false;
+    input.addEventListener('keydown', function(e){
+      e.stopPropagation();
+      if(e.key==='Enter'){ input.blur(); }
+      else if(e.key==='Escape'){ cancelled = true; input.blur(); }
+    });
+    var done = false;
+    input.addEventListener('blur', function(){
+      if(done) return; done = true;
+      var val = input.value.trim();
+      if(!cancelled && val && val!==currentValue) onCommit(val);
+      else renderTree();
+    });
+    el.replaceWith(input);
+    input.focus();
+    input.select();
+  }
   var flatVisible = [];
   var draggedIds = null;
 
@@ -87,6 +114,16 @@
       code.className = 'code'+(n.rtype!=='TR'?' ot':'');
       code.textContent = n.tcode || '(ohne Code)';
       row.appendChild(code);
+      if(n.rtype==='TR'){
+        code.title = 'Doppelklick zum Bearbeiten des Codes';
+        code.addEventListener('dblclick', function(e){
+          e.stopPropagation();
+          startInlineEdit(code, n.tcode||'', function(newVal){
+            S.pushUndo(); S.retagEntry(n.id, newVal.toUpperCase());
+            persist(); renderTree(); renderSide('info');
+          });
+        });
+      }
       if(n.rtype && n.rtype!=='TR'){
         var b=document.createElement('span'); b.className='badge'; b.textContent=n.rtype;
         row.appendChild(b);
@@ -95,6 +132,14 @@
 
     var desc = document.createElement('span'); desc.className='desc';
     desc.textContent = n.text || (n.kind==='folder' ? '(ohne Namen)' : '');
+    desc.title = 'Doppelklick zum Umbenennen';
+    desc.addEventListener('dblclick', function(e){
+      e.stopPropagation();
+      startInlineEdit(desc, n.text||'', function(newVal){
+        S.pushUndo(); S.renameNode(n.id, newVal);
+        persist(); renderTree(); renderSide('info');
+      });
+    });
     row.appendChild(desc);
 
     if(n.kind==='entry' && n.rtype!=='TR' && n.url){
@@ -189,6 +234,8 @@
     document.getElementById('btn-delete').disabled = real.length===0;
     document.getElementById('btn-copy').disabled = real.length===0;
     document.getElementById('btn-paste').disabled = !S.state.clipboard || S.state.clipboard.ids.length===0;
+    var undoBtn = document.getElementById('btn-undo');
+    if(undoBtn) undoBtn.disabled = !S.canUndo();
   }
 
   function renderAll(){ renderTree(); renderSide('info'); }
@@ -332,10 +379,19 @@
       var delBtn=document.createElement('button'); delBtn.className='danger'; delBtn.textContent='🗑 Löschen';
       delBtn.addEventListener('click', function(){ triggerToolbar('btn-delete'); });
       actions.appendChild(editBtn); actions.appendChild(copyBtn); actions.appendChild(delBtn);
+      if(n.kind==='folder' && S.childrenOf(n.id).length>1){
+        var sortBtn=document.createElement('button'); sortBtn.textContent='🔤 Sortieren (A-Z)';
+        sortBtn.title = 'Ordner und Einträge in diesem Ordner alphabetisch sortieren';
+        sortBtn.addEventListener('click', function(){
+          S.sortChildren(n.id, false);
+          persist(); renderTree(); renderSide('info');
+        });
+        actions.appendChild(sortBtn);
+      }
       sidePanel.appendChild(actions);
 
       var hint=document.createElement('div'); hint.className='placeholder detail-hint';
-      hint.textContent = 'Lässt sich auch per Drag & Drop in einen anderen Ordner verschieben.';
+      hint.textContent = 'Doppelklick auf Name'+(n.kind==='entry'&&n.rtype==='TR'?' oder Code':'')+' zum schnellen Umbenennen, oder per Drag & Drop in einen anderen Ordner verschieben.';
       sidePanel.appendChild(hint);
 
     } else if(real.length>1){

@@ -86,7 +86,8 @@
         rtype: isFolder ? null : rtypeRaw,
         tcode: isFolder ? '' : tcode,
         text: textField,
-        url: isFolder ? '' : url
+        url: isFolder ? '' : url,
+        order: objectId
       });
       if(objectId>maxId) maxId=objectId;
     }

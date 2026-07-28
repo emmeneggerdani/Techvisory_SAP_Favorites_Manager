@@ -1,9 +1,10 @@
 /* ====================================================================
    main.js
    Verdrahtet Toolbar/Datei-Events mit Store (Daten) und UI (Rendering).
-   Kümmert sich außerdem um die Verknüpfung mit echten lokalen Dateien
-   für Favoriten und TCode-Datenbank (siehe filestore.js) inkl.
-   automatischem Laden beim Öffnen.
+   Kümmert sich außerdem um Profile (mehrere unabhängig verlinkte
+   Favoriten-Bäume) und die Verknüpfung mit echten lokalen Dateien für
+   Favoriten und TCode-Datenbank (siehe filestore.js) inkl. automatischem
+   Laden beim Öffnen.
    ==================================================================== */
 (function(){
   "use strict";
@@ -11,7 +12,7 @@
   var S = window.Store, UI = window.UI, F = window.SapFormat, FS = window.FileStore;
 
   function emptyRoot(){
-    return {id:1, parentId:0, kind:'root', rtype:null, tcode:'', text:'Meine Favoriten', url:''};
+    return {id:1, parentId:0, kind:'root', rtype:null, tcode:'', text:'Meine Favoriten', url:'', order:0};
   }
   function loadFavoritesJson(text){
     var data = JSON.parse(text);
@@ -96,7 +97,7 @@
       connBar.innerHTML='';
       if(!FS.supported){
         var note = document.createElement('span'); note.className='conn-note';
-        note.textContent = 'Automatische Datei-Verknüpfung wird von diesem Browser nicht unterstützt (nur Chrome/Edge/Opera) – nutze „JSON speichern/laden“ bzw. „TCode-Datenbank laden“ als Alternative.';
+        note.textContent = 'Automatische Datei-Verknüpfung wird von diesem Browser nicht unterstützt (nur Chrome/Edge/Opera) – nutze das ⚙ Einstellungen-Menü als Alternative.';
         connBar.appendChild(note);
         return;
       }
@@ -109,7 +110,7 @@
     }
 
     function connectFavorites(){
-      FS.pickFavoritesFile().then(function(handle){
+      FS.pickFavoritesFile(S.state.activeProfileId).then(function(handle){
         favHandle = handle; favGranted = true;
         return FS.readFile(handle);
       }).then(function(text){
@@ -146,7 +147,7 @@
       });
     }
     function forgetFavorites(){
-      FS.forgetHandle('favorites').then(function(){
+      FS.forgetHandle('favorites:'+S.state.activeProfileId).then(function(){
         favHandle=null; favGranted=false; renderConnectionBar();
         UI.setFooter('Verknüpfung mit der Favoriten-Datei aufgehoben. Änderungen werden weiterhin lokal im Browser gespeichert.');
       });
@@ -194,6 +195,109 @@
       });
     }
 
+    // Versucht beim Start bzw. nach Profilwechsel, die Favoriten-Datei
+    // des aktiven Profils automatisch (wieder) einzuhängen.
+    function loadLinkedFavoritesForActiveProfile(){
+      favHandle = null; favGranted = false;
+      if(!FS.supported) return;
+      FS.tryReconnect('favorites:'+S.state.activeProfileId, true).then(function(res){
+        if(res.state==='granted'){
+          favHandle = res.handle; favGranted = true;
+          return FS.readFile(favHandle).then(function(text){
+            if(text && text.trim()){
+              try{
+                loadFavoritesJson(text);
+                UI.renderAll();
+                UI.setFooter('Automatisch aus verknüpfter Datei "'+favHandle.name+'" geladen – '+(S.state.nodes.size-1)+' Einträge.');
+              }catch(e){ /* Datei nicht lesbar -> lokaler Stand bleibt aktiv */ }
+            }
+            renderConnectionBar();
+          });
+        } else if(res.state==='needs-permission'){
+          favHandle = res.handle; favGranted = false;
+          renderConnectionBar();
+        } else {
+          renderConnectionBar();
+        }
+      });
+    }
+    function loadLinkedTcodeDb(){
+      tcodeHandle = null; tcodeGranted = false;
+      if(!FS.supported) return;
+      FS.tryReconnect('tcodedb', false).then(function(res){
+        if(res.state==='granted'){
+          tcodeHandle = res.handle; tcodeGranted = true;
+          return FS.readFile(tcodeHandle).then(function(text){
+            var count = S.loadTcodeDbFromJson(text, tcodeHandle.name);
+            S.saveTcodeDbLocal();
+            UI.renderSide('info');
+            renderConnectionBar();
+          });
+        } else if(res.state==='needs-permission'){
+          tcodeHandle = res.handle; tcodeGranted = false;
+          renderConnectionBar();
+        } else {
+          renderConnectionBar();
+        }
+      });
+    }
+
+    // ================= Profile =================
+    var profileSelect = document.getElementById('profile-select');
+
+    function renderProfileBar(){
+      var list = S.listProfiles();
+      profileSelect.innerHTML = '';
+      list.forEach(function(p){
+        var o = document.createElement('option'); o.value = p.id; o.textContent = p.name;
+        profileSelect.appendChild(o);
+      });
+      profileSelect.value = S.state.activeProfileId;
+      document.getElementById('btn-profile-delete').disabled = list.length<=1;
+    }
+
+    function switchToProfile(id){
+      S.setActiveProfileId(id);
+      var had = S.loadLocal();
+      if(!had) S.freshRoot();
+      S.state.collapsed = new Set(); S.state.selectedIds = new Set(); S.state.lastAnchorId = null; S.state.clipboard = null;
+      UI.renderAll();
+      renderProfileBar();
+      loadLinkedFavoritesForActiveProfile();
+    }
+
+    profileSelect.addEventListener('change', function(){ switchToProfile(profileSelect.value); });
+
+    document.getElementById('btn-profile-new').addEventListener('click', function(){
+      var name = prompt('Name für das neue Profil (z.B. Systemname/Mandant):');
+      if(!name || !name.trim()) return;
+      var id = S.createProfile(name.trim());
+      S.setActiveProfileId(id);
+      S.freshRoot();
+      S.state.collapsed = new Set(); S.state.selectedIds = new Set(); S.state.lastAnchorId = null; S.state.clipboard = null;
+      UI.renderAll(); S.saveLocal();
+      renderProfileBar();
+      favHandle = null; favGranted = false; renderConnectionBar();
+      UI.setFooter('Profil "'+name.trim()+'" angelegt. Noch keine Datei verknüpft.');
+    });
+    document.getElementById('btn-profile-rename').addEventListener('click', function(){
+      var list = S.listProfiles();
+      var current = list.filter(function(p){ return p.id===S.state.activeProfileId; })[0];
+      var name = prompt('Neuer Name für dieses Profil:', current ? current.name : '');
+      if(!name || !name.trim()) return;
+      S.renameProfile(S.state.activeProfileId, name.trim());
+      renderProfileBar();
+    });
+    document.getElementById('btn-profile-delete').addEventListener('click', function(){
+      var list = S.listProfiles();
+      if(list.length<=1) return;
+      var current = list.filter(function(p){ return p.id===S.state.activeProfileId; })[0];
+      if(!confirm('Profil "'+(current?current.name:'')+'" wirklich löschen? Die lokal zwischengespeicherten Favoriten dieses Profils gehen dabei verloren (eine evtl. verlinkte Datei bleibt auf der Festplatte erhalten).')) return;
+      var remaining = S.deleteProfile(S.state.activeProfileId);
+      switchToProfile(remaining[0].id);
+      UI.setFooter('Profil gelöscht.');
+    });
+
     // ================= Baum-Aktionen =================
     document.getElementById('btn-add-folder').addEventListener('click', function(){ UI.renderSide('add-folder'); });
     document.getElementById('btn-add-tr').addEventListener('click', function(){ UI.renderSide('add-tr'); });
@@ -234,6 +338,23 @@
       UI.renderAll(); Persist.save();
     });
     document.getElementById('btn-dupes').addEventListener('click', function(){ UI.renderSide('duplicates'); });
+
+    // ================= Undo =================
+    function doUndo(){
+      if(!S.undo()) { UI.setFooter('Nichts zum Rückgängig-Machen vorhanden.'); return; }
+      UI.renderAll(); Persist.save();
+      UI.setFooter('Letzte Änderung rückgängig gemacht.');
+    }
+    document.getElementById('btn-undo').addEventListener('click', doUndo);
+
+    // ================= Sortieren (gesamter Baum, im Einstellungen-Menü) ===
+    document.getElementById('btn-sort-all').addEventListener('click', function(){
+      S.sortChildren(1, true);
+      UI.renderAll(); Persist.save();
+      UI.setFooter('Gesamter Baum alphabetisch sortiert.');
+      closeSettings();
+    });
+
     document.getElementById('btn-reset').addEventListener('click', function(){
       if(!confirm('Wirklich alle Favoriten aus diesem Tool löschen? Dies kann nicht rückgängig gemacht werden.')) return;
       S.freshRoot(); S.state.collapsed = new Set(); S.state.clipboard = null;
@@ -248,6 +369,7 @@
       var file = e.target.files[0]; if(!file) return;
       var reader = new FileReader();
       reader.onload = function(ev){
+        S.pushUndo();
         var bytes = new Uint8Array(ev.target.result);
         var parsed = F.parseSapFile(F.decodeCp1252(bytes));
         S.state.nodes = parsed.nodes; S.state.nextId = parsed.nextId;
@@ -277,6 +399,7 @@
       var reader = new FileReader();
       reader.onload = function(ev){
         try{
+          S.pushUndo();
           loadFavoritesJson(ev.target.result);
           UI.renderAll(); Persist.save();
           UI.setFooter('"'+file.name+'" geladen – '+(S.state.nodes.size-1)+' Einträge.');
@@ -334,15 +457,19 @@
       var tag = (document.activeElement && document.activeElement.tagName) || '';
       if(tag==='INPUT' || tag==='SELECT') return;
       if(e.key==='Delete'){ document.getElementById('btn-delete').click(); }
+      if((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key.toLowerCase()==='z'){ e.preventDefault(); doUndo(); return; }
       if((e.ctrlKey||e.metaKey) && e.key==='c'){ document.getElementById('btn-copy').click(); }
       if((e.ctrlKey||e.metaKey) && e.key==='v'){ document.getElementById('btn-paste').click(); }
     });
 
     // ================= Start =================
+    S.state.activeProfileId = S.getActiveProfileId();
+    renderProfileBar();
+
     var hadLocal = S.loadLocal();
     S.loadTcodeDbLocal();
     if(!S.state.localStorageWorks){
-      UI.setFooter('Hinweis: Der lokale Browserspeicher ist hier nicht verfügbar (z.B. Vorschau-Sandbox). Nutze „JSON speichern“/„JSON laden“ zur Sicherung.');
+      UI.setFooter('Hinweis: Der lokale Browserspeicher ist hier nicht verfügbar (z.B. Vorschau-Sandbox). Nutze das ⚙ Einstellungen-Menü zur Sicherung.');
     } else if(hadLocal){
       UI.setFooter('Gespeicherter Stand aus dem Browser geladen – '+(S.state.nodes.size-1)+' Einträge.');
     }
@@ -350,38 +477,10 @@
     renderConnectionBar();
 
     if(FS.supported){
-      FS.tryReconnect('favorites', true).then(function(res){
-        if(res.state==='granted'){
-          favHandle = res.handle; favGranted = true;
-          return FS.readFile(favHandle).then(function(text){
-            if(text && text.trim()){
-              try{
-                loadFavoritesJson(text);
-                UI.renderAll();
-                UI.setFooter('Automatisch aus verknüpfter Datei "'+favHandle.name+'" geladen – '+(S.state.nodes.size-1)+' Einträge.');
-              }catch(e){ /* Datei nicht lesbar -> lokaler Stand bleibt aktiv */ }
-            }
-            renderConnectionBar();
-          });
-        } else if(res.state==='needs-permission'){
-          favHandle = res.handle; favGranted = false;
-          renderConnectionBar();
-        }
+      FS.migrateLegacyFavoritesHandle(S.state.activeProfileId).then(function(){
+        loadLinkedFavoritesForActiveProfile();
       });
-      FS.tryReconnect('tcodedb', false).then(function(res){
-        if(res.state==='granted'){
-          tcodeHandle = res.handle; tcodeGranted = true;
-          return FS.readFile(tcodeHandle).then(function(text){
-            var count = S.loadTcodeDbFromJson(text, tcodeHandle.name);
-            S.saveTcodeDbLocal();
-            UI.renderSide('info');
-            renderConnectionBar();
-          });
-        } else if(res.state==='needs-permission'){
-          tcodeHandle = res.handle; tcodeGranted = false;
-          renderConnectionBar();
-        }
-      });
+      loadLinkedTcodeDb();
     }
   });
 

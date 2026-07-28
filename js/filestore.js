@@ -72,15 +72,17 @@
 
   // ---- Verknüpfung herstellen --------------------------------------------
   // Favoriten: Save-Dialog, damit auch eine neue Datei angelegt werden kann.
-  function pickFavoritesFile(){
+  // Jedes Profil hat seinen eigenen Schlüssel ('favorites:<profilId>').
+  function pickFavoritesFile(profileId){
     return global.showSaveFilePicker({
       suggestedName: 'sap_favoriten.json',
       types: [{description:'SAP Favoriten (JSON)', accept:{'application/json':['.json']}}]
     }).then(function(handle){
-      return idbSet('favorites', handle).then(function(){ return handle; });
+      return idbSet('favorites:'+profileId, handle).then(function(){ return handle; });
     });
   }
   // TCode-Datenbank: Open-Dialog, da i.d.R. eine bereits vorhandene Datei verknüpft wird.
+  // Bewusst NICHT profilgebunden (geteilte Referenzdaten für alle Profile).
   function pickTcodeFile(){
     return global.showOpenFilePicker({
       types: [{description:'TCode-Datenbank (JSON)', accept:{'application/json':['.json']}}],
@@ -89,6 +91,19 @@
       var handle = handles[0];
       return idbSet('tcodedb', handle).then(function(){ return handle; });
     });
+  }
+
+  // Einmalige Migration: aus der Zeit vor mehreren Profilen gab es genau
+  // einen Handle unter dem Schlüssel 'favorites'. Der wird dem Standard-
+  // Profil zugeordnet, damit bestehende Verknüpfungen erhalten bleiben.
+  function migrateLegacyFavoritesHandle(defaultProfileId){
+    return idbGet('favorites').then(function(legacy){
+      if(!legacy) return false;
+      return idbGet('favorites:'+defaultProfileId).then(function(existing){
+        if(existing) return false;
+        return idbSet('favorites:'+defaultProfileId, legacy).then(function(){ return true; });
+      });
+    }).catch(function(){ return false; });
   }
 
   function getLinkedHandle(key){ return idbGet(key); }
@@ -126,7 +141,8 @@
     queryPermission: queryPermission,
     requestPermission: requestPermission,
     readFile: readFile,
-    writeFile: writeFile
+    writeFile: writeFile,
+    migrateLegacyFavoritesHandle: migrateLegacyFavoritesHandle
   };
 
 })(window);
