@@ -88,11 +88,55 @@
     return '◆';
   }
 
+  // Liefert eine navigierbare href für ein OT-URL-Feld, oder null wenn es
+  // sich erkennbar nicht um eine Web-Adresse handelt (z.B. Fiori-Intent
+  // "#SemObj-Action" oder ein SAP-Bereichsmenü-Code wie "WEDI").
+  function toHref(url){
+    var u = (url||'').trim();
+    if(!u) return null;
+    if(/^https?:\/\//i.test(u)) return u;
+    if(/^www\.[^\s]+\.[a-z]{2,}/i.test(u)) return 'https://'+u;
+    return null;
+  }
+
   function buildRow(n, search){
     var row = document.createElement('div');
     row.className = 'node'+(S.state.selectedIds.has(n.id)?' selected':'')+(search.active && search.match.has(n.id)?' match':'');
     row.dataset.id = n.id;
     row.draggable = n.kind!=='root';
+
+    // Klick vs. Doppelklick sauber trennen: ein einzelner Klick löst (leicht
+    // verzögert) die Auswahl + Re-Render aus; kommt innerhalb der Wartezeit
+    // ein zweiter Klick (= dblclick), wird der Timer verworfen, BEVOR ein
+    // Re-Render das Element unter der Maus zerstören kann.
+    function selectNode(e){
+      if(n.kind==='root'){ S.state.selectedIds=new Set([1]); S.state.lastAnchorId=1; renderAll(); return; }
+      if(e.shiftKey && S.state.lastAnchorId!==null && flatVisible.indexOf(S.state.lastAnchorId)!==-1){
+        var i1=flatVisible.indexOf(S.state.lastAnchorId), i2=flatVisible.indexOf(n.id);
+        var lo=Math.min(i1,i2), hi=Math.max(i1,i2);
+        S.state.selectedIds = new Set(flatVisible.slice(lo,hi+1).filter(function(id){ return id!==1; }));
+      } else if(e.ctrlKey || e.metaKey){
+        if(S.state.selectedIds.has(n.id)) S.state.selectedIds.delete(n.id); else S.state.selectedIds.add(n.id);
+        S.state.lastAnchorId = n.id;
+      } else {
+        S.state.selectedIds = new Set([n.id]);
+        S.state.lastAnchorId = n.id;
+      }
+      renderAll();
+    }
+    function attachClickDblclickSplit(el, onDouble){
+      var timer = null;
+      el.addEventListener('click', function(e){
+        e.stopPropagation();
+        if(timer) clearTimeout(timer);
+        timer = setTimeout(function(){ timer=null; selectNode(e); }, 240);
+      });
+      el.addEventListener('dblclick', function(e){
+        e.stopPropagation();
+        if(timer){ clearTimeout(timer); timer=null; }
+        onDouble(e);
+      });
+    }
 
     var kids = S.childrenOf(n.id);
     var hasKids = S.isFolderLike(n) && kids.length>0;
@@ -116,8 +160,7 @@
       row.appendChild(code);
       if(n.rtype==='TR'){
         code.title = 'Doppelklick zum Bearbeiten des Codes';
-        code.addEventListener('dblclick', function(e){
-          e.stopPropagation();
+        attachClickDblclickSplit(code, function(){
           startInlineEdit(code, n.tcode||'', function(newVal){
             S.pushUndo(); S.retagEntry(n.id, newVal.toUpperCase());
             persist(); renderTree(); renderSide('info');
@@ -133,8 +176,7 @@
     var desc = document.createElement('span'); desc.className='desc';
     desc.textContent = n.text || (n.kind==='folder' ? '(ohne Namen)' : '');
     desc.title = 'Doppelklick zum Umbenennen';
-    desc.addEventListener('dblclick', function(e){
-      e.stopPropagation();
+    attachClickDblclickSplit(desc, function(){
       startInlineEdit(desc, n.text||'', function(newVal){
         S.pushUndo(); S.renameNode(n.id, newVal);
         persist(); renderTree(); renderSide('info');
@@ -143,37 +185,26 @@
     row.appendChild(desc);
 
     if(n.kind==='entry' && n.rtype!=='TR' && n.url){
-      var isLink = /^https?:\/\//i.test(n.url);
-      var extra = document.createElement(isLink ? 'a' : 'span');
+      var linkHref = toHref(n.url);
+      var extra = document.createElement(linkHref ? 'a' : 'span');
       extra.className='extra';
       extra.textContent = '('+n.url+')';
-      if(isLink){
-        extra.href = n.url;
+      if(linkHref){
+        extra.href = linkHref;
         extra.target = '_blank';
         extra.rel = 'noopener noreferrer';
-        extra.title = 'In neuem Tab öffnen: '+n.url;
+        extra.title = 'In neuem Tab öffnen: '+linkHref;
         extra.draggable = false;
         extra.addEventListener('click', function(e){ e.stopPropagation(); });
         extra.addEventListener('mousedown', function(e){ e.stopPropagation(); });
+        extra.addEventListener('dblclick', function(e){ e.stopPropagation(); });
       }
       row.appendChild(extra);
     }
 
     row.addEventListener('click', function(e){
       e.stopPropagation();
-      if(n.kind==='root'){ S.state.selectedIds=new Set([1]); S.state.lastAnchorId=1; renderAll(); return; }
-      if(e.shiftKey && S.state.lastAnchorId!==null && flatVisible.indexOf(S.state.lastAnchorId)!==-1){
-        var i1=flatVisible.indexOf(S.state.lastAnchorId), i2=flatVisible.indexOf(n.id);
-        var lo=Math.min(i1,i2), hi=Math.max(i1,i2);
-        S.state.selectedIds = new Set(flatVisible.slice(lo,hi+1).filter(function(id){ return id!==1; }));
-      } else if(e.ctrlKey || e.metaKey){
-        if(S.state.selectedIds.has(n.id)) S.state.selectedIds.delete(n.id); else S.state.selectedIds.add(n.id);
-        S.state.lastAnchorId = n.id;
-      } else {
-        S.state.selectedIds = new Set([n.id]);
-        S.state.lastAnchorId = n.id;
-      }
-      renderAll();
+      selectNode(e);
     });
 
     row.addEventListener('dragstart', function(e){
@@ -358,10 +389,10 @@
       card.appendChild(meta);
       if(n.kind==='entry' && n.rtype!=='TR' && n.url){
         var urlLine = document.createElement('div'); urlLine.className='detail-meta';
-        var isLink = /^https?:\/\//i.test(n.url);
-        if(isLink){
+        var linkHref = toHref(n.url);
+        if(linkHref){
           urlLine.appendChild(document.createTextNode('URL: '));
-          var a=document.createElement('a'); a.href=n.url; a.target='_blank'; a.rel='noopener noreferrer';
+          var a=document.createElement('a'); a.href=linkHref; a.target='_blank'; a.rel='noopener noreferrer';
           a.textContent=n.url; a.className='detail-link';
           urlLine.appendChild(a);
         } else {
