@@ -9,6 +9,7 @@
 (function(){
   "use strict";
 
+  var APP_VERSION = '1.0.0';
   var S = window.Store, UI = window.UI, F = window.SapFormat, FS = window.FileStore;
 
   function emptyRoot(){
@@ -443,6 +444,15 @@
       UI.renderTree();
     });
 
+    // ================= Info (Modal) =================
+    document.getElementById('app-version').textContent = APP_VERSION;
+    var infoOverlay = document.getElementById('info-overlay');
+    function openInfo(){ infoOverlay.hidden = false; }
+    function closeInfo(){ infoOverlay.hidden = true; }
+    document.getElementById('btn-info').addEventListener('click', openInfo);
+    document.getElementById('btn-info-close').addEventListener('click', closeInfo);
+    infoOverlay.addEventListener('click', function(e){ if(e.target===infoOverlay) closeInfo(); });
+
     // ================= Einstellungen (Modal) =================
     var settingsOverlay = document.getElementById('settings-overlay');
     function openSettings(){ settingsOverlay.hidden = false; }
@@ -453,6 +463,7 @@
 
     // ================= Tastenkürzel =================
     document.addEventListener('keydown', function(e){
+      if(e.key==='Escape' && !infoOverlay.hidden){ closeInfo(); return; }
       if(e.key==='Escape' && !settingsOverlay.hidden){ closeSettings(); return; }
       var tag = (document.activeElement && document.activeElement.tagName) || '';
       if(tag==='INPUT' || tag==='SELECT') return;

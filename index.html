@@ -21,6 +21,7 @@
   <button id="btn-dupes">🧭 Duplikate finden</button>
   <div class="spacer"></div>
   <span class="count" id="count-badge"></span>
+  <button id="btn-info" class="icon-btn-round" title="Info">ℹ</button>
   <button id="btn-settings" class="icon-btn-round" title="Einstellungen">⚙</button>
 </div>
 
@@ -64,6 +65,47 @@
 <footer id="footer-msg">Noch keine Favoriten geladen — lade eine bestehende Datei oder lege direkt neue Ordner/Einträge an. Änderungen werden automatisch lokal im Browser gespeichert.</footer>
 
 <!-- Einstellungen: Ausnahme-/Fallback-Funktionen, die nicht über die Datei-Verknüpfung laufen -->
+<!-- Info: Version, über Techvisory, über den Autor -->
+<div id="info-overlay" class="modal-overlay" hidden>
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>Info</h2>
+      <button id="btn-info-close" class="icon-btn">✕</button>
+    </div>
+
+    <div class="modal-section">
+      <div class="info-app">
+        <img src="assets/Techvisory_Kolibri.png" alt="" class="info-kolibri">
+        <div>
+          <div class="info-title">SAP Favoriten-Manager</div>
+          <div class="info-version">Version <span id="app-version"></span></div>
+        </div>
+      </div>
+      <p class="modal-hint">Lokales Tool zur Verwaltung von SAP-GUI-Favoriten – Ordner,
+        Transaktionen, Web-Adressen und Fiori-Apps bearbeiten, ohne dafür SAP GUI selbst
+        zu benötigen.</p>
+    </div>
+
+    <div class="modal-section">
+      <h3>Über Techvisory</h3>
+      <p class="modal-hint">Techvisory ist ein Schweizer Unternehmen für SAP-Technologieberatung
+        und Applikationsentwicklung. Das Team bringt langjährige SAP-Erfahrung mit und legt
+        Wert auf pragmatische, unkomplizierte Lösungen statt Standardfloskeln.
+        Mehr dazu unter <a href="https://www.techvisory.ch" target="_blank" rel="noopener noreferrer">techvisory.ch</a>.</p>
+    </div>
+
+    <div class="modal-section">
+      <h3>Über den Autor</h3>
+      <p class="modal-hint">
+        <!-- TODO: hier kurz ergänzen, wer du bist und was du machst -->
+        Daniel — Seit über 15 Jahren zuhause in der SAP-Entwicklung – von ABAP bis SAP Business Technology Platform.<br>
+Als Expert Development Consultant / Gründer bei Techvisory begleite ich Unternehmen bei der Konzeption und Umsetzung komplexer SAP-Landschaften – von klassischem ABAP über SAP RAP und Fiori/SAPUI5 bis hin zu Integrationsszenarien mit der SAP Integration Suite. Ob onPremise, onAnyCloud oder in Greenfield-Projekten: Ich finde mich rasch in neue Themen ein, denke prozessorientiert und suche pragmatische, tragfähige Lösungen.<br>
+Meine Projekterfahrung reicht über verschiedenste Branchen – von Energieversorgern und Finanzdienstleistern über Detailhandel bis zu Gesundheitswesen und Industrie. Dabei begleite ich S/4HANA-Greenfield-Projekte, entwickle Integrationsstrategien und baue RAP- und Fiori-Applikationen nach Clean-Core-Prinzipien.<br>
+    Mehr dazu auf <a href="https://www.linkedin.com/in/daniel-emmenegger/" target="_blank" rel="noopener noreferrer">Linkedin</a>.</p>
+	</div>
+  </div>
+</div>
+
 <div id="settings-overlay" class="modal-overlay" hidden>
   <div class="modal-card">
     <div class="modal-header">
