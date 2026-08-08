@@ -54,7 +54,7 @@
 
     treePanel.addEventListener('dragover', function(e){ if(draggedIds) e.preventDefault(); });
     treePanel.addEventListener('drop', function(e){
-      if(e.target===treePanel && draggedIds){ e.preventDefault(); S.moveNodes(draggedIds, 1); draggedIds=null; renderAll(); }
+      if(e.target===treePanel && draggedIds){ e.preventDefault(); S.moveNodes(draggedIds, 1); draggedIds=null; renderAll(); persist(); }
     });
   }
 
@@ -215,14 +215,38 @@
       e.dataTransfer.effectAllowed='move';
       e.dataTransfer.setData('text/plain','drag');
     });
-    row.addEventListener('dragover', function(e){ if(!draggedIds) return; e.preventDefault(); row.classList.add('drag-over'); });
-    row.addEventListener('dragleave', function(){ row.classList.remove('drag-over'); });
+    row.addEventListener('dragover', function(e){
+      if(!draggedIds) return;
+      e.preventDefault();
+      var rect = row.getBoundingClientRect();
+      var relY = (e.clientY - rect.top) / rect.height;
+      var zone;
+      if(n.kind==='root'){
+        zone = 'into';
+      } else if(n.kind==='folder'){
+        zone = relY < 0.3 ? 'before' : (relY > 0.7 ? 'after' : 'into');
+      } else {
+        zone = relY < 0.5 ? 'before' : 'after';
+      }
+      row.dataset.dropZone = zone;
+      row.classList.toggle('drag-over', zone==='into');
+      row.classList.toggle('drop-before', zone==='before');
+      row.classList.toggle('drop-after', zone==='after');
+    });
+    row.addEventListener('dragleave', function(){ row.classList.remove('drag-over','drop-before','drop-after'); delete row.dataset.dropZone; });
     row.addEventListener('drop', function(e){
       e.preventDefault(); e.stopPropagation();
-      row.classList.remove('drag-over');
+      var zone = row.dataset.dropZone || 'into';
+      row.classList.remove('drag-over','drop-before','drop-after');
+      delete row.dataset.dropZone;
       if(!draggedIds) return;
-      var target = S.isFolderLike(n) ? n.id : n.parentId;
-      S.moveNodes(draggedIds, target);
+      if(zone==='into'){
+        var targetId = S.isFolderLike(n) ? n.id : n.parentId;
+        S.moveNodesToPosition(draggedIds, targetId, null);
+      } else {
+        var beforeId = zone==='before' ? n.id : S.siblingAfter(n);
+        S.moveNodesToPosition(draggedIds, n.parentId, beforeId);
+      }
       draggedIds = null;
       renderAll();
       persist();
@@ -442,6 +466,32 @@
       var p2=document.createElement('div'); p2.className='placeholder';
       p2.textContent = 'Strg/Cmd+Klick zum Erweitern, Umschalt+Klick für Bereichsauswahl. Gemeinsames Verschieben per Drag & Drop.';
       sidePanel.appendChild(p2);
+
+    } else if(S.state.selectedIds.has(1)){
+      var h4=document.createElement('h2'); h4.textContent='Oberste Ebene'; sidePanel.appendChild(h4);
+      var card4 = document.createElement('div'); card4.className='detail-card';
+      var title4 = document.createElement('div'); title4.className='detail-title'; title4.textContent='Meine Favoriten';
+      card4.appendChild(title4);
+      var meta4 = document.createElement('div'); meta4.className='detail-meta';
+      meta4.textContent = S.childrenOf(1).length+' Element(e) auf oberster Ebene';
+      card4.appendChild(meta4);
+      sidePanel.appendChild(card4);
+
+      if(S.childrenOf(1).length>1){
+        var actions4=document.createElement('div'); actions4.className='panel-actions';
+        var sortBtn4=document.createElement('button'); sortBtn4.textContent='🔤 Sortieren (A-Z)';
+        sortBtn4.title = 'Oberste Ebene alphabetisch sortieren';
+        sortBtn4.addEventListener('click', function(){
+          S.sortChildren(1, false);
+          persist(); renderTree(); renderSide('info');
+        });
+        actions4.appendChild(sortBtn4);
+        sidePanel.appendChild(actions4);
+      }
+
+      var hint4=document.createElement('div'); hint4.className='placeholder detail-hint';
+      hint4.textContent = 'Neue Ordner/Einträge werden hier auf oberster Ebene angelegt.';
+      sidePanel.appendChild(hint4);
 
     } else {
       var h3=document.createElement('h2'); h3.textContent='Auswahl'; sidePanel.appendChild(h3);

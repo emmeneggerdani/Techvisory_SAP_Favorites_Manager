@@ -12,17 +12,19 @@
   <img class="brand-logo" src="assets/Techvisory_Logo.png" alt="Techvisory">
   <h1>SAP Favoriten-Manager</h1>
   <span class="sub">lokal &middot; läuft im Browser &middot; MENU_FAVORITES_UPLOAD/DOWNLOAD-kompatibel</span>
-</header>
-
-<div class="toolbar">
-  <button id="btn-import">📂 SAP-Favoriten laden</button>
-  <button id="btn-export" class="primary">⭳ SAP-Favoriten exportieren</button>
-  <div class="sep"></div>
-  <button id="btn-dupes">🧭 Duplikate finden</button>
   <div class="spacer"></div>
-  <span class="count" id="count-badge"></span>
   <button id="btn-info" class="icon-btn-round" title="Info">ℹ</button>
   <button id="btn-settings" class="icon-btn-round" title="Einstellungen">⚙</button>
+</header>
+
+<div class="toolbar" id="connection-bar"></div>
+
+<div class="toolbar" id="profile-bar">
+  <span class="profile-label">Profil:</span>
+  <select id="profile-select"></select>
+  <button id="btn-profile-new">+ Neu</button>
+  <button id="btn-profile-rename">✎ Umbenennen</button>
+  <button id="btn-profile-delete" class="danger">🗑 Löschen</button>
 </div>
 
 <div class="toolbar">
@@ -38,15 +40,14 @@
   <button id="btn-undo" disabled title="Letzte Änderung rückgängig machen (Strg/Cmd+Z)">↶ Rückgängig</button>
 </div>
 
-<div class="toolbar" id="profile-bar">
-  <span class="profile-label">Profil:</span>
-  <select id="profile-select"></select>
-  <button id="btn-profile-new">+ Neu</button>
-  <button id="btn-profile-rename">✎ Umbenennen</button>
-  <button id="btn-profile-delete" class="danger">🗑 Löschen</button>
+<div class="toolbar toolbar-subtle">
+  <button id="btn-export" class="primary">⭳ SAP-Favoriten exportieren</button>
+  <div class="sep"></div>
+  <button id="btn-import" class="subtle">📂 SAP-Favoriten importieren</button>
+  <button id="btn-dupes" class="subtle">🧭 Duplikate finden</button>
+  <div class="spacer"></div>
+  <span class="count" id="count-badge"></span>
 </div>
-
-<div class="toolbar" id="connection-bar"></div>
 
 <main>
   <div id="tree-col">
@@ -97,7 +98,6 @@
     <div class="modal-section">
       <h3>Über den Autor</h3>
       <p class="modal-hint">
-        <!-- TODO: hier kurz ergänzen, wer du bist und was du machst -->
         Daniel — Seit über 15 Jahren zuhause in der SAP-Entwicklung – von ABAP bis SAP Business Technology Platform.<br>
 Als Expert Development Consultant / Gründer bei Techvisory begleite ich Unternehmen bei der Konzeption und Umsetzung komplexer SAP-Landschaften – von klassischem ABAP über SAP RAP und Fiori/SAPUI5 bis hin zu Integrationsszenarien mit der SAP Integration Suite. Ob onPremise, onAnyCloud oder in Greenfield-Projekten: Ich finde mich rasch in neue Themen ein, denke prozessorientiert und suche pragmatische, tragfähige Lösungen.<br>
 Meine Projekterfahrung reicht über verschiedenste Branchen – von Energieversorgern und Finanzdienstleistern über Detailhandel bis zu Gesundheitswesen und Industrie. Dabei begleite ich S/4HANA-Greenfield-Projekte, entwickle Integrationsstrategien und baue RAP- und Fiori-Applikationen nach Clean-Core-Prinzipien.<br>

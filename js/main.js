@@ -9,7 +9,7 @@
 (function(){
   "use strict";
 
-  var APP_VERSION = '1.0.0';
+  var APP_VERSION = '1.1.0';
   var S = window.Store, UI = window.UI, F = window.SapFormat, FS = window.FileStore;
 
   function emptyRoot(){
@@ -97,11 +97,15 @@
     function renderConnectionBar(){
       connBar.innerHTML='';
       if(!FS.supported){
+        connBar.classList.remove('conn-ok','conn-warn');
         var note = document.createElement('span'); note.className='conn-note';
         note.textContent = 'Automatische Datei-Verknüpfung wird von diesem Browser nicht unterstützt (nur Chrome/Edge/Opera) – nutze das ⚙ Einstellungen-Menü als Alternative.';
         connBar.appendChild(note);
         return;
       }
+      var favOk = !!(favHandle && favGranted);
+      connBar.classList.toggle('conn-ok', favOk);
+      connBar.classList.toggle('conn-warn', !favOk);
       connBar.appendChild(connItem('Favoriten-Datei', favHandle, favGranted, {
         onConnect: connectFavorites, onReconnect: reconnectFavorites, onForget: forgetFavorites
       }));

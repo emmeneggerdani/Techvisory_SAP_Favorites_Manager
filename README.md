@@ -21,7 +21,7 @@ im Ordner `assets/`).
    Standard-Browser (empfohlen: **Chrome** oder **Edge**, siehe
    [Hinweis zu Firefox/Safari](#hinweis-für-firefox--safari-nutzerinnen)).
 3. Entweder eine bestehende Favoriten-Datei aus SAP GUI laden (Button
-   **„SAP-Favoriten laden"**), oder direkt links im Baum neue Ordner
+   **„SAP-Favoriten importieren"**), oder direkt links im Baum neue Ordner
    und Einträge anlegen.
 4. Fertig bearbeitet? Über **„SAP-Favoriten exportieren"** eine Datei
    erzeugen und in SAP GUI unter *Favoriten → Favoriten hochladen*
@@ -153,6 +153,24 @@ Kurz zusammengefasst: frei nutzbar, veränderbar und weitergebbar für
 **nicht-kommerzielle Zwecke**; kein Verkauf, keine kostenpflichtige
 Bereitstellung. Die Software wird **ohne jede Gewährleistung** zur
 Verfügung gestellt – Nutzung auf eigenes Risiko.
+
+## Änderungsprotokoll
+
+**1.1.0**
+- Drag & Drop: Einträge lassen sich jetzt auch präzise *vor* oder
+  *nach* einem Ordner einsortieren (bisher landeten sie beim
+  Ziehen auf einen Ordner immer darin).
+- Klickflächen vergrössert: Auf-/Zuklapp-Pfeil sowie Zeilenhöhe im
+  Baum, für einfacheres Treffen beim Klicken und beim Ziehen.
+- Verbindungsleiste (Favoriten-Datei/TCode-Datenbank) färbt sich
+  jetzt grün bei bestehender Verknüpfung bzw. gelb, wenn keine
+  Datei verknüpft ist – Status auf einen Blick erkennbar.
+- Button „SAP-Favoriten laden" in „SAP-Favoriten importieren"
+  umbenannt; Import und „Duplikate finden" optisch zurückgenommen,
+  damit die Datei-Verknüpfung im Vordergrund steht.
+
+**1.0.0**
+- Erste veröffentlichte Version.
 
 ---
 

@@ -172,6 +172,45 @@
       n.order = nextOrder(targetFolderId);
     });
   }
+  // Wie moveNodes, aber setzt die verschobenen Knoten an eine genaue Position
+  // innerhalb der Geschwister (unmittelbar vor beforeId, oder ans Ende wenn
+  // beforeId null/nicht vorhanden ist). Für Drag & Drop-Umsortierung.
+  function moveNodesToPosition(idSet, targetFolderId, beforeId){
+    var target = state.nodes.get(targetFolderId);
+    if(!target || !isFolderLike(target)) return;
+    pushUndo();
+    var moved = [];
+    idSet.forEach(function(id){
+      if(id===1) return;
+      var n = state.nodes.get(id);
+      if(!n || n.id===targetFolderId) return;
+      if(n.kind==='folder'){
+        var sub = new Set(); collectSubtree(n.id, sub);
+        if(sub.has(targetFolderId)) return; // Zyklus verhindern
+      }
+      n.parentId = targetFolderId;
+      moved.push(n);
+    });
+    if(!moved.length) return;
+    var movedIds = {};
+    moved.forEach(function(n){ movedIds[n.id] = true; });
+    var siblings = childrenOf(targetFolderId).filter(function(n){ return !movedIds[n.id]; });
+    var insertAt = siblings.length;
+    if(beforeId!==null && beforeId!==undefined){
+      for(var i=0;i<siblings.length;i++){
+        if(siblings[i].id===beforeId){ insertAt = i; break; }
+      }
+    }
+    var result = siblings.slice(0, insertAt).concat(moved, siblings.slice(insertAt));
+    result.forEach(function(n, i){ n.order = i; });
+  }
+  function siblingAfter(n){
+    var sibs = childrenOf(n.parentId);
+    for(var i=0;i<sibs.length;i++){
+      if(sibs[i].id===n.id) return (i+1<sibs.length) ? sibs[i+1].id : null;
+    }
+    return null;
+  }
   function cloneSubtree(id, newParentId){
     var orig = state.nodes.get(id);
     var newId = state.nextId++;
@@ -408,6 +447,8 @@
     retagEntry: retagEntry,
     deleteNodes: deleteNodes,
     moveNodes: moveNodes,
+    moveNodesToPosition: moveNodesToPosition,
+    siblingAfter: siblingAfter,
     cloneSubtree: cloneSubtree,
     pasteClipboard: pasteClipboard,
     sortChildren: sortChildren,
