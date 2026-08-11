@@ -282,24 +282,45 @@
   function normalizeTcodeDb(data){
     var map = new Map();
     if(Array.isArray(data)){
+      var total = data.length, unrecognized = 0;
       data.forEach(function(item){
-        if(Array.isArray(item) && item.length>=2){
+        if(Array.isArray(item) && item.length>=2 && item[0]!=null && String(item[0]).trim()!==''){
           map.set(String(item[0]).trim().toUpperCase(), String(item[1]).trim());
-        } else if(item && typeof item==='object'){
+        } else if(item && typeof item==='object' && !Array.isArray(item)){
           var code = item.tcode || item.TCODE || item.Tcode || item.code || item.Code;
           var text = item.text || item.TEXT || item.Text || item.description || item.Description || item.beschreibung || item.Beschreibung;
-          if(code) map.set(String(code).trim().toUpperCase(), String(text||'').trim());
+          if(code && String(code).trim()!==''){
+            map.set(String(code).trim().toUpperCase(), String(text||'').trim());
+          } else {
+            unrecognized++;
+          }
+        } else {
+          unrecognized++;
         }
       });
+      if(total>0 && unrecognized===total){
+        throw new Error('Ungültiges Format: Kein Eintrag enthält ein erkennbares Code-Feld (erwartet werden Objekte mit "tcode"/"code" und "text"/"description", oder Arrays wie ["SE16N","Data Browser"]).');
+      }
     } else if(data && typeof data==='object'){
-      Object.keys(data).forEach(function(k){
-        map.set(k.trim().toUpperCase(), String(data[k]||'').trim());
+      var keys = Object.keys(data);
+      if(keys.length===0){
+        // leeres Objekt {} ist eine gültige, wenn auch leere Datenbank
+      }
+      keys.forEach(function(k){
+        map.set(k.trim().toUpperCase(), String(data[k]==null ? '' : data[k]).trim());
       });
+    } else {
+      throw new Error('Ungültiges Format: Die Datei muss ein JSON-Array von TCode-Einträgen oder ein Objekt der Form {"CODE":"Beschreibung"} enthalten.');
     }
     return map;
   }
   function loadTcodeDbFromJson(jsonText, label){
-    var data = JSON.parse(jsonText);
+    var data;
+    try{
+      data = JSON.parse(jsonText);
+    }catch(e){
+      throw new Error('Ungültiges JSON: '+e.message);
+    }
     state.tcodeDb = normalizeTcodeDb(data);
     state.tcodeDbLabel = label || '';
     return state.tcodeDb.size;

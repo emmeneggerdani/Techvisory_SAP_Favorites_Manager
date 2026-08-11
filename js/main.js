@@ -184,6 +184,8 @@
           UI.setFooter('Wieder mit TCode-Datenbank "'+tcodeHandle.name+'" verbunden – '+count+' Codes.');
           renderConnectionBar();
         });
+      }).catch(function(err){
+        alert('TCode-Datenbank "'+tcodeHandle.name+'" hat ein ungültiges Format und konnte nicht geladen werden: '+(err && err.message ? err.message : err));
       });
     }
     function reloadTcode(){
@@ -192,6 +194,8 @@
         S.saveTcodeDbLocal();
         UI.renderSide('info');
         UI.setFooter('TCode-Datenbank neu von Datei geladen – '+count+' Codes.');
+      }).catch(function(err){
+        alert('TCode-Datenbank "'+tcodeHandle.name+'" hat ein ungültiges Format und konnte nicht neu geladen werden: '+(err && err.message ? err.message : err));
       });
     }
     function forgetTcode(){
@@ -233,9 +237,13 @@
         if(res.state==='granted'){
           tcodeHandle = res.handle; tcodeGranted = true;
           return FS.readFile(tcodeHandle).then(function(text){
-            var count = S.loadTcodeDbFromJson(text, tcodeHandle.name);
-            S.saveTcodeDbLocal();
-            UI.renderSide('info');
+            try{
+              var count = S.loadTcodeDbFromJson(text, tcodeHandle.name);
+              S.saveTcodeDbLocal();
+              UI.renderSide('info');
+            }catch(err){
+              UI.setFooter('TCode-Datenbank "'+tcodeHandle.name+'" hat ein ungültiges Format und konnte nicht geladen werden: '+(err && err.message ? err.message : err));
+            }
             renderConnectionBar();
           });
         } else if(res.state==='needs-permission'){
@@ -425,7 +433,7 @@
           S.saveTcodeDbLocal();
           UI.renderSide('info');
           UI.setFooter('TCode-Datenbank "'+file.name+'" geladen – '+count+' Codes.');
-        }catch(err){ alert('Diese Datei konnte nicht als TCode-Datenbank (JSON) gelesen werden.'); }
+        }catch(err){ alert('Diese Datei konnte nicht als TCode-Datenbank geladen werden: '+(err && err.message ? err.message : err)); }
       };
       reader.readAsText(file);
       e.target.value='';
