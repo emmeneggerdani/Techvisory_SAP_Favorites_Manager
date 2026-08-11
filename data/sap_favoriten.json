@@ -1,5 +1,5 @@
 {
-  "nextId": 16,
+  "nextId": 4,
   "nodes": [
     {
       "id": 1,
@@ -8,34 +8,8 @@
       "rtype": null,
       "tcode": "",
       "text": "Meine Favoriten",
-      "url": ""
-    },
-    {
-      "id": 9,
-      "parentId": 1,
-      "kind": "folder",
-      "rtype": null,
-      "tcode": "",
-      "text": "Testordner für Report / Freitext irgendwas",
-      "url": ""
-    },
-    {
-      "id": 8,
-      "parentId": 1,
-      "kind": "folder",
-      "rtype": null,
-      "tcode": "",
-      "text": "TestOrdner URL",
-      "url": ""
-    },
-    {
-      "id": 4,
-      "parentId": 1,
-      "kind": "folder",
-      "rtype": null,
-      "tcode": "",
-      "text": "Test Ordner Fiori",
-      "url": ""
+      "url": "",
+      "order": 0
     },
     {
       "id": 2,
@@ -43,93 +17,19 @@
       "kind": "folder",
       "rtype": null,
       "tcode": "",
-      "text": "TestOrdner Transaktion",
-      "url": ""
+      "text": "Test",
+      "url": "",
+      "order": 0
     },
     {
       "id": 3,
       "parentId": 2,
       "kind": "entry",
       "rtype": "TR",
-      "tcode": "SE80",
-      "text": "Object Navigator",
-      "url": ""
-    },
-    {
-      "id": 6,
-      "parentId": 4,
-      "kind": "entry",
-      "rtype": "OT",
-      "tcode": "FLP_APP_PROVIDER",
-      "text": "Startseite Fiori Launchpad",
-      "url": "#"
-    },
-    {
-      "id": 5,
-      "parentId": 4,
-      "kind": "entry",
-      "rtype": "OT",
-      "tcode": "FLP_APP_PROVIDER",
-      "text": "PurchaseOrder Maintain",
-      "url": "#PurchaseOrder-Maintain"
-    },
-    {
-      "id": 7,
-      "parentId": 8,
-      "kind": "entry",
-      "rtype": "OT",
-      "tcode": "URL",
-      "text": "irgendeine Adresse",
-      "url": "www.techvisory.ch"
-    },
-    {
-      "id": 10,
-      "parentId": 9,
-      "kind": "entry",
-      "rtype": "OT",
-      "tcode": "URL",
-      "text": "WEDI - Transaktionsmenu für EDI",
-      "url": "WEDI"
-    },
-    {
-      "id": 11,
-      "parentId": 2,
-      "kind": "folder",
-      "rtype": null,
-      "tcode": "",
-      "text": "Demo Unterordner",
-      "url": ""
-    },
-    {
-      "id": 12,
-      "parentId": 11,
-      "kind": "entry",
-      "rtype": "TR",
-      "tcode": "SE16N",
-      "text": "Allgemeine Tabellenanzeige",
+      "tcode": "SCFD_REGISTRY",
+      "text": "Custom Fields: Registry UI",
       "url": "",
-      "fioriSemObj": "",
-      "fioriAction": ""
-    },
-    {
-      "id": 14,
-      "parentId": 1,
-      "kind": "entry",
-      "rtype": "TR",
-      "tcode": "SE24",
-      "text": "ABAP Class Builder",
-      "url": "",
-      "fioriSemObj": "",
-      "fioriAction": ""
-    },
-    {
-      "id": 15,
-      "parentId": 1,
-      "kind": "entry",
-      "rtype": "TR",
-      "tcode": "SE80",
-      "text": "Object Navigator",
-      "url": "",
+      "order": 0,
       "fioriSemObj": "",
       "fioriAction": ""
     }
